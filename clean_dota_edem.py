@@ -1,10 +1,11 @@
+#!/usr/bin/env python
+
 from __future__ import annotations
 
 import re
 import sys
 import winreg
 from pathlib import Path
-
 
 DOTA_APP_ID = "570"
 TARGET_EXTENSION = ".edem"
@@ -184,11 +185,8 @@ def clean_edem_files(replay_folder: Path) -> tuple[int, int, int]:
     deleted_size = 0
     failed_count = 0
 
-    for file in replay_folder.rglob("*"):
+    for file in replay_folder.rglob(f"*{TARGET_EXTENSION}"):
         if not file.is_file():
-            continue
-
-        if file.suffix.lower() != TARGET_EXTENSION:
             continue
 
         try:
