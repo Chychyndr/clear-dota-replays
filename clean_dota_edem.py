@@ -12,7 +12,7 @@ TARGET_EXTENSION = ".edem"
 
 
 def get_steam_path_from_registry() -> Path | None:
-    """Пытается найти Steam через реестр Windows."""
+    """Try to locate Steam using the Windows registry."""
 
     registry_locations = [
         (winreg.HKEY_CURRENT_USER, r"Software\Valve\Steam", "SteamPath"),
@@ -46,7 +46,7 @@ def get_steam_path_from_registry() -> Path | None:
 
 
 def find_steam_manually() -> Path | None:
-    """Запасной поиск Steam в стандартных местах."""
+    """Fall back to searching standard Steam installation paths."""
 
     possible_paths = [
         Path(r"C:\Program Files (x86)\Steam"),
@@ -61,7 +61,7 @@ def find_steam_manually() -> Path | None:
 
 
 def get_steam_libraries(steam_path: Path) -> list[Path]:
-    """Получает список всех библиотек Steam."""
+    """Get a list of all Steam libraries."""
 
     libraries = {steam_path}
 
@@ -85,7 +85,7 @@ def get_steam_libraries(steam_path: Path) -> list[Path]:
     )
 
     for path_string in paths:
-        # В VDF иногда используются экранированные обратные слэши
+        # VDF files sometimes use escaped backslashes
         path_string = path_string.replace(r"\\", "\\")
 
         path = Path(path_string)
@@ -97,7 +97,7 @@ def get_steam_libraries(steam_path: Path) -> list[Path]:
 
 
 def get_dota_install_dir(library: Path) -> Path | None:
-    """Ищет Dota 2 в конкретной библиотеке Steam."""
+    """Locate Dota 2 in a specific Steam library."""
 
     manifest = (
         library
@@ -140,8 +140,8 @@ def get_dota_install_dir(library: Path) -> Path | None:
 
 def find_replay_folders(dota_path: Path) -> list[Path]:
     """
-    Ищет возможные папки с реплеями.
-    Основной современный путь:
+    Find possible replay directories.
+    Primary current path:
     dota 2 beta/game/dota/replays
     """
 
@@ -173,9 +173,9 @@ def format_size(size: int) -> str:
 
 def clean_edem_files(replay_folder: Path) -> tuple[int, int, int]:
     """
-    Удаляет все .edem внутри replay_folder.
+    Delete all .edem files within replay_folder.
 
-    Возвращает:
+    Returns:
         deleted_count
         deleted_size
         failed_count
@@ -192,7 +192,7 @@ def clean_edem_files(replay_folder: Path) -> tuple[int, int, int]:
         try:
             size = file.stat().st_size
 
-            print(f"Удаляю: {file}")
+            print(f"Deleting: {file}")
 
             file.unlink()
 
@@ -203,16 +203,16 @@ def clean_edem_files(replay_folder: Path) -> tuple[int, int, int]:
             failed_count += 1
 
             print(
-                f"Не удалось удалить:\n"
+                f"Failed to delete:\n"
                 f"  {file}\n"
-                f"  Причина: {error}\n"
+                f"  Reason: {error}\n"
             )
 
     return deleted_count, deleted_size, failed_count
 
 
 def main() -> None:
-    print("Поиск Steam...")
+    print("Searching for Steam...")
 
     steam_path = get_steam_path_from_registry()
 
@@ -220,14 +220,14 @@ def main() -> None:
         steam_path = find_steam_manually()
 
     if steam_path is None:
-        print("Steam не найден.")
+        print("Steam not found.")
         sys.exit(1)
 
-    print(f"Steam найден: {steam_path}")
+    print(f"Steam found: {steam_path}")
 
     libraries = get_steam_libraries(steam_path)
 
-    print(f"Найдено библиотек Steam: {len(libraries)}")
+    print(f"Steam libraries found: {len(libraries)}")
 
     dota_paths: list[Path] = []
 
@@ -238,7 +238,7 @@ def main() -> None:
             dota_paths.append(dota_path)
 
     if not dota_paths:
-        print("Dota 2 не найдена.")
+        print("Dota 2 not found.")
         sys.exit(1)
 
     total_deleted = 0
@@ -248,14 +248,14 @@ def main() -> None:
 
     for dota_path in dota_paths:
         print()
-        print(f"Dota 2 найдена: {dota_path}")
+        print(f"Dota 2 found: {dota_path}")
 
         replay_folders = find_replay_folders(dota_path)
 
         for replay_folder in replay_folders:
             replay_folders_found += 1
 
-            print(f"Папка реплеев: {replay_folder}")
+            print(f"Replay directory: {replay_folder}")
             print()
 
             deleted, size, failed = clean_edem_files(
@@ -270,17 +270,17 @@ def main() -> None:
     print("=" * 50)
 
     if replay_folders_found == 0:
-        print("Папка с реплеями не найдена.")
+        print("No replay directories found.")
         return
 
     if total_deleted == 0:
-        print("Файлов .edem не найдено.")
+        print("No .edem files found.")
     else:
-        print(f"Удалено файлов: {total_deleted}")
-        print(f"Освобождено: {format_size(total_size)}")
+        print(f"Files deleted: {total_deleted}")
+        print(f"Disk space freed: {format_size(total_size)}")
 
     if total_failed:
-        print(f"Не удалось удалить: {total_failed}")
+        print(f"Files that could not be deleted: {total_failed}")
 
     print("=" * 50)
 
