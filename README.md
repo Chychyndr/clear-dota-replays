@@ -1,18 +1,18 @@
 # Dota 2 EDEM Cleaner
 
-Простой скрипт для Windows, который автоматически находит установленную Dota 2 и удаляет все файлы реплеев с расширением `.edem`.
+A simple Windows script that automatically locates your Dota 2 installation and removes all `.edem` replay files.
 
-## Запуск
+## Usage
 
 ```powershell
 uv run clean_dota_edem.py
 ```
 
-Скрипт автоматически:
+The script automatically:
 
-* находит Steam и Dota 2;
-* определяет папку `replays`;
-* удаляет все `.edem`;
-* показывает количество удалённых файлов и освобождённое место.
+- Locates Steam and Dota 2.
+- Finds the replay directories.
+- Deletes all `.edem` files.
+- Reports how many files were deleted and how much disk space was freed.
 
-Обычные реплеи `.dem` не удаляются.
+Regular `.dem` replay files are preserved.
